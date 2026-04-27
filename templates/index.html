@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnatoliaBox | Sanal Kurye Havuzu</title>
+    <meta name="description" content="AnatoliaBox: Restoranlar ve kuryeler için akıllı teslimat ekosistemi. Asenkron, hızlı ve güvenilir.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050510;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #f59e0b;
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Background Glows */
+        .glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(80px);
+        }
+        .glow-1 { top: -100px; right: -100px; }
+        .glow-2 { bottom: -200px; left: -100px; background: radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, transparent 70%); }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 10%;
+            position: absolute;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #3b82f6, #60a5fa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-primary);
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 10%;
+            gap: 2rem;
+            position: relative;
+        }
+
+        .hero-content {
+            flex: 1;
+            max-width: 650px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-content h1 {
+            font-size: 4.5rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+        }
+
+        .hero-content h1 span {
+            color: var(--accent-primary);
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            margin-bottom: 2.5rem;
+            max-width: 500px;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-primary);
+            color: white;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .hero-image {
+            flex: 1;
+            height: 70vh;
+            background: url('/static/images/hero.png') no-repeat center center;
+            background-size: contain;
+            border-radius: 30px;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, var(--bg-color), transparent);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 10rem 10%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-primary);
+        }
+
+        .feature-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+        }
+
+        .feature-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @media (max-width: 1024px) {
+            .hero-content h1 { font-size: 3.5rem; }
+            .hero { flex-direction: column; text-align: center; height: auto; padding-top: 10rem; }
+            .cta-group { justify-content: center; }
+            .hero-image { width: 100%; height: 400px; margin-top: 3rem; }
+            .hero-content p { margin-inline: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <nav>
+        <div class="logo">AnatoliaBox</div>
+        <ul class="nav-links">
+            <li><a href="#how">Nasıl Çalışır?</a></li>
+            <li><a href="#restaurants">Restoranlar</a></li>
+            <li><a href="#couriers">Kuryeler</a></li>
+        </ul>
+        <a href="https://admin.anatoliabox.store" class="btn btn-secondary" style="padding: 0.6rem 1.5rem; font-size: 0.9rem;">Yönetici Girişi</a>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Geleceğin <span>Teslimat</span> Ekosistemi</h1>
+                <p>Türkiye'nin en gelişmiş asenkron kurye havuzu. Restoranlar için hız, kuryeler için özgürlük, işletmeniz için tam kontrol.</p>
+                <div class="cta-group">
+                    <a href="#" class="btn btn-primary">Hemen Başla</a>
+                    <a href="https://api.anatoliabox.store" class="btn btn-secondary">API Dokümantasyonu</a>
+                </div>
+            </div>
+            <div class="hero-image"></div>
+        </section>
+
+        <section class="features" id="how">
+            <div class="feature-card">
+                <span class="icon">🚀</span>
+                <h3>Hızlı Atama</h3>
+                <p>Siparişlerinizi havuza bırakın, saniyeler içinde en yakın kurye ile eşleşsin.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">🛡️</span>
+                <h3>Güvenli Takip</h3>
+                <p>Uçtan uca şifreli veri akışı ve gerçek zamanlı sipariş izleme sistemi.</p>
+            </div>
+            <div class="feature-card">
+                <span class="icon">📈</span>
+                <h3>Akıllı Analiz</h3>
+                <p>Teslimat sürelerini ve kurye performanslarını yapay zeka ile optimize edin.</p>
+            </div>
+        </section>
+
+        <section style="padding: 10rem 10%; background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.05)); text-align: center;">
+            <h2 style="font-size: 3rem; margin-bottom: 2rem;">İşinizi Büyütmeye Hazır mısınız?</h2>
+            <p style="color: var(--text-dim); max-width: 600px; margin: 0 auto 3rem;">Hemen AnatoliaBox ekosistemine katılın ve lojistik süreçlerinizi dijitalleştirin.</p>
+            <a href="#" class="btn btn-primary">Ücretsiz Kayıt Ol</a>
+        </section>
+    </main>
+
+    <footer style="padding: 5rem 10%; border-top: 1px solid var(--glass-border); text-align: center; color: var(--text-dim);">
+        <p>&copy; 2026 AnatoliaBox. Tüm hakları saklıdır. @anatoliabox.store</p>
+    </footer>
+</body>
+</html>
