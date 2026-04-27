@@ -15,23 +15,23 @@ class OrderFlowSerializer(serializers.ModelSerializer):
         fields = ['id', 'status', 'actor_name', 'timestamp']
 
 class OrderSerializer(serializers.ModelSerializer):
-    restaurant_name = serializers.CharField(source='restaurant.username', read_only=True)
+    shop_name = serializers.CharField(source='shop.username', read_only=True)
     courier_name = serializers.CharField(source='courier.username', read_only=True)
     logs = OrderFlowSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
         fields = [
-            'id', 'restaurant', 'restaurant_name', 'courier', 'courier_name',
+            'id', 'shop', 'shop_name', 'courier', 'courier_name',
             'delivery_address', 'latitude', 'longitude', 'fee', 'status',
             'created_at', 'updated_at', 'logs'
         ]
-        read_only_fields = ['restaurant', 'courier', 'status', 'created_at', 'updated_at']
+        read_only_fields = ['shop', 'courier', 'status', 'created_at', 'updated_at']
 
     def create(self, validated_data):
-        # Siparişi oluşturan restoranı otomatik ata
+        # Siparişi oluşturan dükkanı otomatik ata
         request = self.context.get('request')
-        validated_data['restaurant'] = request.user
+        validated_data['shop'] = request.user
         order = super().create(validated_data)
         
         # İlk log kaydını oluştur

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block sidebar %}
+<!-- 403 sayfasında sidebar yok -->
+{% endblock %}
+
+{% block content %}
+<div class="h-full flex items-center justify-center text-center">
+    <div>
+        <div class="text-9xl font-black text-brand-muted/20 mb-4">403</div>
+        <h1 class="text-3xl font-bold mb-4">Erişim Reddedildi</h1>
+        <p class="text-brand-muted mb-8 max-w-md mx-auto">
+            Görüntülemeye çalıştığınız sayfaya erişim yetkiniz bulunmamaktadır. Rolünüz: 
+            <span class="text-white font-medium px-2 py-1 bg-slate-800 rounded">{{ getattr(request.user, 'get_role_display', 'Bilinmiyor') }}</span>
+        </p>
+        
+        {% if request.user.role == 'SHOP' %}
+            <a href="{% url 'shop_dashboard' %}" class="btn bg-brand-accent hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition">Kendi Panelinize Dönün</a>
+        {% elif request.user.role == 'COURIER' %}
+            <a href="{% url 'courier_dashboard' %}" class="btn bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition">Kendi Panelinize Dönün</a>
+        {% else %}
+            <a href="{% url 'landing' %}" class="btn bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg font-medium transition">Ana Sayfaya Dön</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

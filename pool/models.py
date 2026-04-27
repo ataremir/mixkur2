@@ -8,7 +8,7 @@ class User(AbstractUser):
     Restoran ve Kurye rollerini ayırır.
     """
     class Role(models.TextChoices):
-        RESTAURANT = 'RESTAURANT', _('Restoran')
+        SHOP = 'SHOP', _('Dükkan')
         COURIER = 'COURIER', _('Kurye')
         ADMIN = 'ADMIN', _('Admin')
 
@@ -35,11 +35,11 @@ class Order(models.Model):
         DELIVERED = 'DELIVERED', _('Teslim Edildi')
         CANCELLED = 'CANCELLED', _('İptal')
 
-    restaurant = models.ForeignKey(
+    shop = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
         related_name='managed_orders',
-        limit_choices_to={'role': User.Role.RESTAURANT}
+        limit_choices_to={'role': User.Role.SHOP}
     )
     courier = models.ForeignKey(
         User,

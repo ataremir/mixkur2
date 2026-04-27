@@ -1,0 +1,19 @@
+<header class="bg-brand-card shadow-sm border-b border-slate-700 h-16 flex items-center justify-between px-6">
+    <div class="flex items-center gap-4">
+        <div class="font-bold text-xl text-brand-accent tracking-tighter">Anatolia<span class="text-white">Box</span></div>
+        {% if request.user.is_authenticated %}
+            <span class="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded-full font-medium">
+                {{ getattr(request.user, 'get_role_display', '') }}
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="flex items-center gap-4 text-sm font-medium">
+        {% if request.user.is_authenticated %}
+            <div class="text-brand-muted">Hoş Geldin, <span class="text-white">{{ request.user.username }}</span></div>
+            <a href="#" class="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors rounded-lg">Çıkış Yap</a>
+        {% else %}
+            <a href="#" class="text-brand-muted hover:text-white transition">Giriş</a>
+        {% endif %}
+    </div>
+</header>

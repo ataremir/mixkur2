@@ -5,7 +5,7 @@ from .models import User, Order, OrderFlow
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     """
-    Kurye ve Restoranları ayıran gelişmiş Kullanıcı Yönetim paneli.
+    Kurye ve Dükkanları ayıran gelişmiş Kullanıcı Yönetim paneli.
     """
     list_display = ('username', 'email', 'role', 'phone_number', 'is_staff')
     list_filter = ('role', 'is_staff', 'is_active')
@@ -25,9 +25,9 @@ class OrderAdmin(admin.ModelAdmin):
     """
     Siparişlerin statü bazlı yönetimi.
     """
-    list_display = ('id', 'restaurant', 'courier', 'status', 'fee', 'created_at')
-    list_filter = ('status', 'restaurant') # Statüye göre filtreleme
-    search_fields = ('id', 'delivery_address', 'restaurant__username', 'courier__username')
+    list_display = ('id', 'shop', 'courier', 'status', 'fee', 'created_at')
+    list_filter = ('status', 'shop') # Statüye göre filtreleme
+    search_fields = ('id', 'delivery_address', 'shop__username', 'courier__username')
     readonly_fields = ('created_at', 'updated_at')
     list_editable = ('status',)
 

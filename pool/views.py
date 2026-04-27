@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Order, OrderFlow, User
 from .serializers import OrderSerializer
-from .permissions import IsRestaurant, IsCourier, IsOrderOwner
+from .permissions import IsShop, IsCourier, IsOrderOwner
 
 class OrderViewSet(viewsets.ModelViewSet):
     """
@@ -15,7 +15,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            return [IsRestaurant()]
+            return [IsShop()]
         if self.action in ['claim', 'list_ready']:
             return [IsCourier()]
         if self.action in ['update', 'partial_update', 'destroy']:
@@ -24,9 +24,9 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == User.Role.RESTAURANT:
-            # Restoranlar sadece kendi siparişlerini görür
-            return Order.objects.filter(restaurant=user)
+        if user.role == User.Role.SHOP:
+            # Dükkanlar sadece kendi siparişlerini görür
+            return Order.objects.filter(shop=user)
         elif user.role == User.Role.COURIER:
             # Kuryeler tüm 'Hazır' siparişleri veya kendilerine atanmış olanları görür
             return Order.objects.filter(status__in=[Order.Status.READY, Order.Status.CLAIMED, Order.Status.ON_THE_WAY])
@@ -82,7 +82,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='set-ready')
     def set_ready(self, request, pk=None):
         """
-        Restoranın siparişi 'Hazır' (Havuza düşme) durumuna getirmesi.
+        Dükkanın siparişi 'Hazır' (Havuza düşme) durumuna getirmesi.
         """
         order = self.get_object()
         if order.status != Order.Status.PREPARING:
