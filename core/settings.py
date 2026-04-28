@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'isletme_app',
     'telegram_bot',
     'analytics_app',
+    'demo_app',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +55,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'core.middleware.AdminAccessMiddleware',
-    'core.middleware.IsletmeAccessMiddleware',               # İşletme subdomain koruması
+    'core.middleware.IsletmeAccessMiddleware',
+    'core.middleware.APIAccessMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'analytics_app.middleware.IPLoggerMiddleware',           # IP Loglama

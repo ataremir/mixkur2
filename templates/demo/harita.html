@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="tr">
+{% load l10n %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatolia Box - Canlı Takip</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h1 { margin: 0 0 10px 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .status { 
+            display: inline-block; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            background: var(--primary); 
+            color: #000;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-item { font-size: 0.9rem; opacity: 0.8; }
+        .info-value { font-weight: 600; opacity: 1; margin-top: 2px; }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: black;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn:hover { transform: scale(1.05); }
+
+        /* Marker Icons */
+        .marker-icon { background: white; border-radius: 50%; padding: 5px; border: 2px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div class="overlay">
+        <div class="card">
+            <h1>📦 Anatolia Box Demo <span>•</span> <span id="status-text" class="status">{{ siparis.durum }}</span></h1>
+            <div class="info-grid">
+                <div class="info-item">Sipariş ID<div class="info-value">#{{ siparis.id }}</div></div>
+                <div class="info-item">Kurye<div class="info-value" id="courier-name">{{ siparis.kurye.user.username|default:"Atanmadı" }}</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="centerMap()">Konumuma Odaklan</button>
+    </div>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=geometry"></script>
+    
+    <script>
+        let map, directionsService, directionsRenderer;
+        let courierMarker;
+        const siparisId = parseInt("{{ siparis.id }}");
+        const userId = parseInt("{{ user.id|default:0 }}");
+        
+        const shopPos = { 
+            lat: parseFloat("{{ siparis.isletme_enlem|unlocalize }}"), 
+            lng: parseFloat("{{ siparis.isletme_boylam|unlocalize }}") 
+        };
+        const customerPos = { 
+            lat: parseFloat("{{ siparis.musteri_enlem|unlocalize }}"), 
+            lng: parseFloat("{{ siparis.musteri_boylam|unlocalize }}") 
+        };
+        let courierPos = { 
+            lat: parseFloat("{{ siparis.kurye.anlik_enlem|default:0|unlocalize }}"), 
+            lng: parseFloat("{{ siparis.kurye.anlik_boylam|default:0|unlocalize }}") 
+        };
+
+        const darkMapStyle = [
+            { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
+            { "elementType": "labels.text.stroke", "stylers": [{ "color": "#242f3e" }] },
+            { "elementType": "labels.text.fill", "stylers": [{ "color": "#746855" }] },
+            { "featureType": "administrative.locality", "elementType": "labels.text.fill", "stylers": [{ "color": "#d59563" }] },
+            { "featureType": "poi", "elementType": "labels.text.fill", "stylers": [{ "color": "#d59563" }] },
+            { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#38414e" }] },
+            { "featureType": "road", "elementType": "geometry.stroke", "stylers": [{ "color": "#212a37" }] },
+            { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "color": "#9ca5b3" }] },
+            { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#17263c" }] }
+        ];
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 14,
+                center: shopPos,
+                styles: darkMapStyle,
+                disableDefaultUI: true
+            });
+
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true,
+                polylineOptions: { strokeColor: "#f59e0b", strokeWeight: 5, strokeOpacity: 0.8 }
+            });
+
+            // Markers
+            new google.maps.Marker({ position: shopPos, map: map, label: "B", title: "İşletme" });
+            new google.maps.Marker({ position: customerPos, map: map, label: "C", title: "Müşteri" });
+            
+            courierMarker = new google.maps.Marker({
+                position: courierPos,
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                    scale: 6,
+                    fillColor: "#f59e0b",
+                    fillOpacity: 1,
+                    strokeWeight: 2,
+                    rotation: 0
+                }
+            });
+
+            calculateRoute();
+            startTracking();
+        }
+
+        function calculateRoute() {
+            const request = {
+                origin: courierPos.lat === 0 ? shopPos : courierPos,
+                destination: customerPos,
+                waypoints: [{ location: shopPos, stopover: true }],
+                travelMode: 'DRIVING'
+            };
+
+            directionsService.route(request, (result, status) => {
+                if (status == 'OK') {
+                    directionsRenderer.setDirections(result);
+                }
+            });
+        }
+
+        function startTracking() {
+            if (navigator.geolocation) {
+                // İlk konum alımı
+                navigator.geolocation.getCurrentPosition(updatePosition);
+                // Her 10 saniyede bir güncelle
+                setInterval(() => {
+                    navigator.geolocation.getCurrentPosition(updatePosition);
+                }, 10000);
+            }
+        }
+
+        function updatePosition(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            // Backend'e gönder
+            if (userId > 0) {
+                fetch('/api/konum-guncelle/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, lat: lat, lng: lng })
+                });
+            }
+
+            // Haritayı güncelle
+            const newPos = { lat, lng };
+            courierMarker.setPosition(newPos);
+            courierPos = newPos;
+        }
+
+        function centerMap() {
+            map.setCenter(courierPos);
+            map.setZoom(16);
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>

@@ -82,3 +82,22 @@ class IsletmeAccessMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+class APIAccessMiddleware:
+    """
+    api.anatoliabox.store subdomain koruması.
+    Sadece ADMIN ve is_staff erişebilir.
+    Aksi takdirde ana alan adına (anatoliabox.store) yönlendirilir.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        host = request.get_host()
+
+        if host.startswith('api.'):
+            if not request.user.is_authenticated or not (request.user.is_staff or getattr(request.user, 'role', '') == 'ADMIN'):
+                return redirect('http://anatoliabox.store/')
+
+        return self.get_response(request)
