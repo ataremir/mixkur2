@@ -1,35 +1,82 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Order, OrderFlow
+from .models import User, Order, OrderFlow, ShopProfile, CourierProfile
+
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     """
     Kurye ve Dükkanları ayıran gelişmiş Kullanıcı Yönetim paneli.
+    Telegram Chat ID ile bot entegrasyonu görünür.
     """
-    list_display = ('username', 'email', 'role', 'phone_number', 'is_staff')
+    list_display = ('username', 'email', 'role', 'phone_number', 'telegram_chat_id', 'is_staff')
     list_filter = ('role', 'is_staff', 'is_active')
-    search_fields = ('username', 'email', 'first_name', 'last_name') # İsim ve e-posta araması
+    search_fields = ('username', 'email', 'first_name', 'last_name', 'telegram_chat_id')
     ordering = ('username',)
-    
-    # Rol ve telefon numarasını panellere ekle
+
+    # Rol, telefon ve Telegram bilgilerini panellere ekle
     fieldsets = BaseUserAdmin.fieldsets + (
-        ('Sanal Kurye Bilgileri', {'fields': ('role', 'phone_number')}),
+        ('Sanal Kurye Bilgileri', {'fields': ('role', 'phone_number', 'telegram_chat_id')}),
     )
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        ('Sanal Kurye Bilgileri', {'fields': ('role', 'phone_number')}),
+        ('Sanal Kurye Bilgileri', {'fields': ('role', 'phone_number', 'telegram_chat_id')}),
     )
+
+
+@admin.register(ShopProfile)
+class ShopProfileAdmin(admin.ModelAdmin):
+    """Dükkan profilleri yönetimi."""
+    list_display = ('shop_name', 'user', 'latitude', 'longitude', 'created_at')
+    search_fields = ('shop_name', 'user__username')
+    raw_id_fields = ('user',)
+
+
+@admin.register(CourierProfile)
+class CourierProfileAdmin(admin.ModelAdmin):
+    """Kurye profilleri yönetimi."""
+    list_display = ('user', 'is_online', 'live_latitude', 'live_longitude', 'location_updated_at')
+    list_filter = ('is_online',)
+    search_fields = ('user__username',)
+    raw_id_fields = ('user',)
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     """
     Siparişlerin statü bazlı yönetimi.
+    Batch ve Telegram bilgileri de görüntülenir.
     """
-    list_display = ('id', 'shop', 'courier', 'status', 'fee', 'created_at')
-    list_filter = ('status', 'shop') # Statüye göre filtreleme
+    list_display = ('id', 'shop', 'courier', 'status', 'fee', 'package_amount', 'created_at')
+    list_filter = ('status', 'shop')
     search_fields = ('id', 'delivery_address', 'shop__username', 'courier__username')
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'telegram_group_message_id', 'google_maps_link')
     list_editable = ('status',)
+
+    fieldsets = (
+        ('Sipariş Bilgileri', {
+            'fields': ('shop', 'courier', 'status', 'fee', 'package_amount')
+        }),
+        ('Konum Bilgileri', {
+            'fields': ('delivery_address', 'latitude', 'longitude', 'google_maps_link')
+        }),
+        ('Batch (Birleştirme) Bilgileri', {
+            'fields': ('batch_parent', 'batch_offered_to', 'batch_offered_at'),
+            'classes': ('collapse',),
+        }),
+        ('Telegram Bilgileri', {
+            'fields': ('telegram_group_message_id',),
+            'classes': ('collapse',),
+        }),
+        ('Tarihler', {
+            'fields': ('created_at', 'updated_at'),
+        }),
+    )
+
+    def google_maps_link(self, obj):
+        """Admin panelinde Google Maps linkini gösterir."""
+        return obj.google_maps_link
+    google_maps_link.short_description = 'Google Maps Linki'
+
 
 @admin.register(OrderFlow)
 class OrderFlowAdmin(admin.ModelAdmin):

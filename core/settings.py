@@ -2,12 +2,14 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
-# Dotenv entegrasyonu
+# Dotenv entegrasyonu (Ortam değişkenlerini .env dosyasından yükler)
 try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
+    import dotenv
+    dotenv.load_dotenv(os.path.join(BASE_DIR, '.env'))
+except (ImportError, Exception):
+    # Paket kurulu değilse veya dosya yoksa sessizce devam et
     pass
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -35,6 +37,8 @@ INSTALLED_APPS = [
     # Internal
     'pool',
     'isletme_app',
+    'telegram_bot',
+    'analytics_app',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +52,7 @@ MIDDLEWARE = [
     'core.middleware.IsletmeAccessMiddleware',               # İşletme subdomain koruması
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'analytics_app.middleware.IPLoggerMiddleware',           # IP Loglama
     'django_hosts.middleware.HostsResponseMiddleware',       # En altta
 ]
 
@@ -132,3 +137,22 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+# ──────────────────────────────────────────────────
+# Celery Yapılandırması (Redis Backend)
+# ──────────────────────────────────────────────────
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Istanbul'
+
+# ──────────────────────────────────────────────────
+# Telegram Bot Ayarları
+# ──────────────────────────────────────────────────
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_COURIER_GROUP_ID = os.getenv('TELEGRAM_COURIER_GROUP_ID', '')
+
+# Sabit kurye ücreti (₺)
+DEFAULT_DELIVERY_FEE = float(os.getenv('DEFAULT_DELIVERY_FEE', '50.00'))

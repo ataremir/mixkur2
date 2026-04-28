@@ -5,3 +5,13 @@ psycopg2-binary>=2.9.0
 django-filter>=23.0
 django-hosts>=6.0.0
 python-dotenv>=1.0.0
+
+# Telegram Bot Entegrasyonu
+python-telegram-bot>=20.0
+
+# Celery & Redis (Asenkron Görevler)
+celery>=5.3.0
+redis>=5.0.0
+
+# HTTP istekleri (Celery→Telegram API iletişimi)
+requests>=2.31.0
