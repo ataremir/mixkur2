@@ -51,7 +51,7 @@ MIDDLEWARE = [
 
 # Subdomain Yapılandırması
 ROOT_HOSTCONF = 'core.hosts'
-DEFAULT_HOST = 'api'
+DEFAULT_HOST = 'www'
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
