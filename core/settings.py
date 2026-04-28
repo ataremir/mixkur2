@@ -2,16 +2,21 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
-# Dotenv entegrasyonu (Ortam değişkenlerini .env dosyasından yükler)
-try:
-    import dotenv
-    dotenv.load_dotenv(os.path.join(BASE_DIR, '.env'))
-except (ImportError, Exception):
-    # Paket kurulu değilse veya dosya yoksa sessizce devam et
-    pass
-
+# .env dosyasını bağımlılık olmadan (pure python) yükleyen fonksiyon
+def load_env_file(env_path):
+    if os.path.exists(env_path):
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ.setdefault(key, value)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Ortam değişkenlerini yükle
+load_env_file(os.path.join(BASE_DIR, '.env'))
+
 
 # Güvenlik Ayarları (.env'den okunur)
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
