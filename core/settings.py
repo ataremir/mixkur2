@@ -25,28 +25,30 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third party
     'django_hosts',
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
-    
+
     # Internal
     'pool',
+    'isletme_app',
 ]
 
 MIDDLEWARE = [
-    'django_hosts.middleware.HostsRequestMiddleware',  # En üstte
+    'django_hosts.middleware.HostsRequestMiddleware',       # En üstte
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'core.middleware.AdminAccessMiddleware',
+    'core.middleware.IsletmeAccessMiddleware',               # İşletme subdomain koruması
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_hosts.middleware.HostsResponseMiddleware', # En altta
+    'django_hosts.middleware.HostsResponseMiddleware',       # En altta
 ]
 
 # Subdomain Yapılandırması
@@ -106,10 +108,14 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CSRF ve Session Dosyaları
+# CSRF ve Session Ayarları
 CSRF_TRUSTED_ORIGINS = [url.strip() for url in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if url.strip()]
 SESSION_COOKIE_DOMAIN = os.getenv('SESSION_COOKIE_DOMAIN', '.anatoliabox.store')
 CSRF_COOKIE_DOMAIN = os.getenv('SESSION_COOKIE_DOMAIN', '.anatoliabox.store')
+
+# Giriş/Çıkış Yönlendirmeleri
+LOGIN_URL = '/giris/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 
 # REST Framework
 REST_FRAMEWORK = {

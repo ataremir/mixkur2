@@ -11,6 +11,7 @@ class User(AbstractUser):
         SHOP = 'SHOP', _('Dükkan')
         COURIER = 'COURIER', _('Kurye')
         ADMIN = 'ADMIN', _('Admin')
+        ISLETME = 'ISLETME', _('İşletme')
 
     role = models.CharField(
         max_length=20,

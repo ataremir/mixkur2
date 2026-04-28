@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | AnatoliaBox İşletme</title>
+    <meta name="google-adsense-account" content="ca-pub-9804139900544479">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { outfit: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        neon: { cyan: '#00f3ff', magenta: '#ff00ea', purple: '#bc00ff', green: '#00ff88' },
+                        dark: { 900: '#050508', 800: '#0a0a12', 700: '#10101c', 600: '#1a1a2e' },
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(10, 10, 18, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+        }
+        .glass-card:hover {
+            border-color: rgba(0, 243, 255, 0.25);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="font-outfit bg-dark-900 text-white min-h-screen">
+
+    <!-- Background gradient -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-neon-cyan/5 rounded-full blur-[150px]"></div>
+        <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-neon-purple/5 rounded-full blur-[120px]"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="relative z-20 border-b border-white/5 bg-dark-900/80 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <p class="text-sm tracking-[6px] uppercase text-neon-cyan/60 font-semibold">AnatoliaBox</p>
+                <span class="text-white/10">|</span>
+                <p class="text-xs tracking-[3px] uppercase text-white/30">İşletme Paneli</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <span class="text-sm text-white/40">{{ user.username }}</span>
+                <a href="/profil/" class="text-xs text-neon-cyan/50 hover:text-neon-cyan transition-colors duration-300 tracking-wide uppercase">Profil</a>
+                <a href="/cikis/" class="text-xs text-red-400/50 hover:text-red-400 transition-colors duration-300 tracking-wide uppercase">Çıkış</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Ana İçerik -->
+    <main class="relative z-10 max-w-7xl mx-auto px-6 py-10">
+
+        <!-- Başarı/Hata mesajları -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="mb-6 px-4 py-3 rounded-lg border text-sm
+            {% if message.tags == 'error' %}
+                border-red-500/30 bg-red-500/10 text-red-300
+            {% elif message.tags == 'success' %}
+                border-green-500/30 bg-green-500/10 text-green-300
+            {% else %}
+                border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan
+            {% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Hoş geldin -->
+        <div class="mb-10">
+            <h1 class="text-3xl font-bold mb-2">
+                Hoş Geldin,
+                <span class="text-neon-cyan">{% if profil %}{{ profil.isletme_adi }}{% else %}{{ user.username }}{% endif %}</span>
+            </h1>
+            <p class="text-white/30 text-sm tracking-wide">İşletme yönetim panelinize hoş geldiniz.</p>
+        </div>
+
+        <!-- İstatistik Kartları -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+            <!-- Durum -->
+            <div class="glass-card rounded-xl p-5 transition-all duration-500">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs tracking-[2px] uppercase text-white/30">Durum</span>
+                    <span class="w-2.5 h-2.5 rounded-full {% if profil and profil.aktif %}bg-neon-green{% else %}bg-red-500{% endif %} animate-pulse"></span>
+                </div>
+                <p class="text-xl font-bold {% if profil and profil.aktif %}text-neon-green{% else %}text-red-400{% endif %}">
+                    {% if profil and profil.aktif %}Aktif{% else %}Pasif{% endif %}
+                </p>
+            </div>
+
+            <!-- Sektör -->
+            <div class="glass-card rounded-xl p-5 transition-all duration-500">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs tracking-[2px] uppercase text-white/30">Sektör</span>
+                </div>
+                <p class="text-xl font-bold text-neon-cyan">
+                    {% if profil %}{{ profil.get_sektor_display }}{% else %}—{% endif %}
+                </p>
+            </div>
+
+            <!-- Lokasyon -->
+            <div class="glass-card rounded-xl p-5 transition-all duration-500">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs tracking-[2px] uppercase text-white/30">Lokasyon</span>
+                </div>
+                <p class="text-xl font-bold text-neon-purple">
+                    {% if profil and profil.il %}{{ profil.il }}{% if profil.ilce %} / {{ profil.ilce }}{% endif %}{% else %}—{% endif %}
+                </p>
+            </div>
+
+            <!-- Kayıt Tarihi -->
+            <div class="glass-card rounded-xl p-5 transition-all duration-500">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs tracking-[2px] uppercase text-white/30">Kayıt</span>
+                </div>
+                <p class="text-xl font-bold text-neon-magenta">
+                    {% if profil %}{{ profil.olusturulma_tarihi|date:"d.m.Y" }}{% else %}{{ user.date_joined|date:"d.m.Y" }}{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Profil Detay Kartı -->
+        {% if profil %}
+        <div class="glass-card rounded-2xl p-8 mb-10">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-semibold tracking-wide">İşletme Bilgileri</h2>
+                <a href="/profil/" class="text-xs tracking-[2px] uppercase text-neon-cyan/60 hover:text-neon-cyan border border-neon-cyan/20 hover:border-neon-cyan/40 px-4 py-2 rounded-lg transition-all duration-300">
+                    Düzenle
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-10">
+                <div>
+                    <span class="text-xs text-white/30 tracking-wide uppercase">İşletme Adı</span>
+                    <p class="text-white/80 mt-1">{{ profil.isletme_adi }}</p>
+                </div>
+                <div>
+                    <span class="text-xs text-white/30 tracking-wide uppercase">Telefon</span>
+                    <p class="text-white/80 mt-1">{{ profil.telefon }}</p>
+                </div>
+                <div>
+                    <span class="text-xs text-white/30 tracking-wide uppercase">Sektör</span>
+                    <p class="text-white/80 mt-1">{{ profil.get_sektor_display }}</p>
+                </div>
+                <div>
+                    <span class="text-xs text-white/30 tracking-wide uppercase">İl / İlçe</span>
+                    <p class="text-white/80 mt-1">{{ profil.il|default:"—" }} / {{ profil.ilce|default:"—" }}</p>
+                </div>
+                <div class="md:col-span-2">
+                    <span class="text-xs text-white/30 tracking-wide uppercase">Adres</span>
+                    <p class="text-white/80 mt-1">{{ profil.adres }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Hızlı Eylemler -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <a href="/profil/" class="glass-card rounded-xl p-6 text-center group hover:border-neon-cyan/30 transition-all duration-500">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-neon-cyan/10 flex items-center justify-center group-hover:bg-neon-cyan/20 transition-all duration-500">
+                    <svg class="w-6 h-6 text-neon-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold mb-1">Profili Düzenle</h3>
+                <p class="text-xs text-white/30">İşletme bilgilerinizi güncelleyin</p>
+            </a>
+
+            <div class="glass-card rounded-xl p-6 text-center opacity-50 cursor-not-allowed">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-neon-purple/10 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-neon-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold mb-1">İstatistikler</h3>
+                <p class="text-xs text-white/30">Çok yakında…</p>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 text-center opacity-50 cursor-not-allowed">
+                <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-neon-magenta/10 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-neon-magenta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold mb-1">Ödemeler</h3>
+                <p class="text-xs text-white/30">Çok yakında…</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-white/5 mt-16">
+        <div class="max-w-7xl mx-auto px-6 py-6 text-center">
+            <p class="text-[11px] tracking-[3px] text-white/15 uppercase">&copy; 2026 AnatoliaBox İşletme Paneli</p>
+        </div>
+    </footer>
+
+</body>
+</html>
